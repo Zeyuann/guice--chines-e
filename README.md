@@ -1,2 +1,4 @@
-# guice-chinese
+# 介绍
 尝试翻译guice文档
+
+第0章：翻译说明
