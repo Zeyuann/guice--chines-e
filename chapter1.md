@@ -29,7 +29,52 @@ public interface BillingService{
 同类的实现一起，我们将为代码编写单元测试。在测试中，我们需要一个`FakeCreditCardProcessor`而不是个真实信用卡支付。
 
 
-### Direct constructor calls
+### 直接使用构造函数
+这里的代码展示了我们`new`一个credit card processor 和 transaction logger:
+```java
+public class RealBillingService implements BillingService {
+  public Receipt chargeOrder(PizzaOrder order, CreditCard creditCard) {
+    CreditCardProcessor processor = new PaypalCreditCardProcessor();
+    TransactionLog transactionLog = new DatabaseTransactionLog();
+
+    try {
+      ChargeResult result = processor.charge(creditCard, order.getAmount());
+      transactionLog.logChargeResult(result);
+
+      return result.wasSuccessful()
+          ? Receipt.forSuccessfulCharge(order.getAmount())
+          : Receipt.forDeclinedCharge(result.getDeclineMessage());
+     } catch (UnreachableException e) {
+      transactionLog.logConnectException(e);
+      return Receipt.forSystemFailure(e.getMessage());
+    }
+  }
+}
+```
+
+这段代码凸显了(poses)模块化(modularity)和可测性(testability)的问题。这种直接的、编译期间的对一个真实的card processor的依赖，意味着测试代码的时候讲使用真的信用卡付款！并且，当拒绝支付(*charge is declined*)或者服务不可用的时候，测试这些情况的话，显得捉襟见肘。
+
+### 工厂
+工厂类解偶(decouples)实现类和调用方(client)。一种简单的工厂，是使用静态方法为某个接口获取和设置模拟的(mock)实现类。一个工厂的实现，可以参照以下样板(boilerplate)代码:
+```java
+public class CreditCardProcessorFactory {
+
+  private static CreditCardProcessor instance;
+
+  public static void setInstance(CreditCardProcessor processor) {
+    instance = processor;
+  }
+
+  public static CreditCardProcessor getInstance() {
+    if (instance == null) {
+      return new SquareCreditCardProcessor();
+    }
+
+    return instance;
+  }
+}
+```
+
 
 ## 从这里开始
 
