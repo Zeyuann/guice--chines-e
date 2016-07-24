@@ -81,7 +81,7 @@ public class CreditCardProcessorFactory {
   }
 }
 ```
-在我们的客户端实现的的代码中，我们仅仅将new的调用替换成工厂：
+在我们的调用端实现的的代码中，我们仅仅将new的调用替换成工厂：
 
 ```java
 public class RealBillingService implements BillingService {
@@ -143,6 +143,76 @@ public class RealBillingServiceTest extends TestCase {
 
 质量问题可以通过QA或者验收测试(acceptance tests)发现。这或许就够了，但是我们当然可以做的更好。
 
+### 依赖注入
+
+和工厂一样，依赖注入也仅仅是一种设计模式。其核心原则是*将表现和依赖项解析分离(separate behaviour from dependency resolution)*。在我们的例子中，`RealBillingService`并没有职责去寻找`TransactionLog`和`CreditCardProcessor`。相反，它们通过构造方法的参数传入
+
+```java
+public class RealBillingService implements BillingService {
+  private final CreditCardProcessor processor;
+  private final TransactionLog transactionLog;
+
+  public RealBillingService(CreditCardProcessor processor, 
+      TransactionLog transactionLog) {
+    this.processor = processor;
+    this.transactionLog = transactionLog;
+  }
+
+  public Receipt chargeOrder(PizzaOrder order, CreditCard creditCard) {
+    try {
+      ChargeResult result = processor.charge(creditCard, order.getAmount());
+      transactionLog.logChargeResult(result);
+
+      return result.wasSuccessful()
+          ? Receipt.forSuccessfulCharge(order.getAmount())
+          : Receipt.forDeclinedCharge(result.getDeclineMessage());
+     } catch (UnreachableException e) {
+      transactionLog.logConnectException(e);
+      return Receipt.forSystemFailure(e.getMessage());
+    }
+  }
+}
+```
+
+我不需要任何工厂，并且通过移除`setUp`和`tearDown`样板，我们可以简化测试用例：
+ 
+ ```java
+ public class RealBillingServiceTest extends TestCase {
+
+  private final PizzaOrder order = new PizzaOrder(100);
+  private final CreditCard creditCard = new CreditCard("1234", 11, 2010);
+
+  private final InMemoryTransactionLog transactionLog = new InMemoryTransactionLog();
+  private final FakeCreditCardProcessor processor = new FakeCreditCardProcessor();
+
+  /*译者注: 和上一版相比，这里不再使用setUp()和tearDown()了*/
+  public void testSuccessfulCharge() {
+    RealBillingService billingService
+        = new RealBillingService(processor, transactionLog);
+    Receipt receipt = billingService.chargeOrder(order, creditCard);
+
+    assertTrue(receipt.hasSuccessfulCharge());
+    assertEquals(100, receipt.getAmountOfCharge());
+    assertEquals(creditCard, processor.getCardOfOnlyCharge());
+    assertEquals(100, processor.getAmountOfOnlyCharge());
+    assertTrue(transactionLog.wasSuccessLogged());
+  }
+}
+```
+
+现在，不论什么时候我们添加或移除以来，编译器会提醒我们测试代码需要修复。依赖*被暴露在了API签名(API signature)*。
+
+不幸的是，现在`BillingService`的调用方需要去检查这些依赖。我们又可以用一些设计模式来修复一部分依赖！依赖`BillingService`的这些类，需要将其放入他们的构造方法(**)。对于那些处于顶层的类，拥有一个框架(译者注: 这里指依赖注入框架)是十分有用的。否则在你要使用服务的时候，你需要递归去创建依赖。
+
+```java
+  public static void main(String[] args) {
+    CreditCardProcessor processor = new PaypalCreditCardProcessor();
+    TransactionLog transactionLog = new DatabaseTransactionLog();
+    BillingService billingService
+        = new RealBillingService(processor, transactionLog);
+    ...
+  }
+```
 
 
 ## 从这里开始
