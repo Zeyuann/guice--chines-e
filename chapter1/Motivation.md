@@ -2,6 +2,7 @@
 
 ### 目的
 在应用开发中，将所有东西放到一块是颇为烦人(tedious)的。有很多中方法去将数据、服务，表示类(presentation classes)相互连接。为了对比这些方法，我们来编写一个匹萨🍕订购网站的账单代码:
+
 ```java
 public interface BillingService{
   /**
@@ -26,8 +27,12 @@ public interface BillingService{
 同类的实现一起，我们将为代码编写单元测试。在测试中，我们需要一个`FakeCreditCardProcessor`而不是个真实信用卡支付。
 
 
+
+
+
 ### 直接使用构造函数
 这里的代码展示了我们`new`一个credit card processor 和 transaction logger:
+
 ```java
 public class RealBillingService implements BillingService {
   public Receipt chargeOrder(PizzaOrder order, CreditCard creditCard) {
@@ -53,8 +58,11 @@ public class RealBillingService implements BillingService {
 
 
 
+
+
 ### 工厂
 工厂类解偶(decouples)实现类和调用方(client)。一种简单的工厂，是使用静态方法为某个接口获取和设置模拟的(mock)实现类。一个工厂的实现，可以参照以下样板(boilerplate)代码:
+
 ```java
 public class CreditCardProcessorFactory {
 
@@ -66,7 +74,7 @@ public class CreditCardProcessorFactory {
 
   public static CreditCardProcessor getInstance() {
     if (instance == null) {
-      return new SquareCreditCardProcessor();
+      return new SquareCreditCardProcessor();/*译者注: 注意这里用的是Square*/
     }
 
     return instance;
@@ -105,7 +113,7 @@ public class RealBillingServiceTest extends TestCase {
   private final CreditCard creditCard = new CreditCard("1234", 11, 2010);
 
   private final InMemoryTransactionLog transactionLog = new InMemoryTransactionLog();
-  private final FakeCreditCardProcessor processor = new FakeCreditCardProcessor();
+  private final FakeCreditCardProcessor processor = new FakeCreditCardProcessor(); /*译者注: 注意这里可以new一个FakeCard*/
 
   @Override public void setUp() {
     TransactionLogFactory.setInstance(transactionLog);
@@ -118,8 +126,8 @@ public class RealBillingServiceTest extends TestCase {
   }
 
   public void testSuccessfulCharge() {
-    RealBillingService billingService = new RealBillingService();
-    Receipt receipt = billingService.chargeOrder(order, creditCard);
+    RealBillingService billingService = new RealBillingService(); 
+    Receipt receipt = billingService.chargeOrder(order, creditCard);/*译者注: 这次就可以从工厂里获得FakeCard了*/
 
     assertTrue(receipt.hasSuccessfulCharge());
     assertEquals(100, receipt.getAmountOfCharge());
@@ -129,9 +137,11 @@ public class RealBillingServiceTest extends TestCase {
   }
 }
 ```
-这段代码非常笨拙(clumsy)。
+这段代码非常笨拙(clumsy)。全局变量维持了mock的实现，所以在setUp和tearDown的过程中必须小心翼翼。如果`tearDown`失败了，那么全局变量仍然指向测试实例（译者注：）。这可能导致别的测试出现问题，并且限制了我们并行进行多个测试。
 
+但是最严重的问题是，依赖*被隐藏在了代码里*。如果我们在一个`CreditCardFraudTracker`上添加一个依赖，我们必须重新跑这个测试，去找到哪些依赖被破坏了(*which ones will break*)。如果我们忘了为一个production service初始化一个工厂，那么直到尝试支付之前，我们都无法发觉。随着应用的不断庞大，管理(babysitting)这些工厂阻碍了开发效率(*becomes a growing drain on productivity*)。
 
+质量问题可以通过QA或者验收测试(acceptance tests)发现。这或许就够了，但是我们当然可以做的更好。
 
 
 

@@ -22,3 +22,8 @@
 
 dependency injection - 依赖注入
 
+### 翻译收获：
+记录译者学到的姿势：
+
+xxx variable point at yyy instance : 变量xxx指向了yyy的实例
+
