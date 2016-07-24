@@ -1,5 +1,7 @@
 # 1. 用户手册
 
+
+
 ## 目的
 ### 目的
 在应用开发中，将所有东西放到一块是颇为烦人(tedious)的。有很多中方法去将数据、服务，表示类(presentation classes)相互连接。为了对比这些方法，我们来编写一个匹萨🍕订购网站的账单代码:
@@ -54,6 +56,8 @@ public class RealBillingService implements BillingService {
 
 这段代码凸显了(poses)模块化(modularity)和可测性(testability)的问题。这种直接的、编译期间的对一个真实的card processor的依赖，意味着测试代码的时候讲使用真的信用卡付款！并且，当拒绝支付(*charge is declined*)或者服务不可用的时候，测试这些情况的话，显得捉襟见肘。
 
+
+
 ### 工厂
 工厂类解偶(decouples)实现类和调用方(client)。一种简单的工厂，是使用静态方法为某个接口获取和设置模拟的(mock)实现类。一个工厂的实现，可以参照以下样板(boilerplate)代码:
 ```java
@@ -74,6 +78,7 @@ public class CreditCardProcessorFactory {
   }
 }
 ```
+
 
 
 ## 从这里开始
