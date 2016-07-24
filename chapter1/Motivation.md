@@ -30,7 +30,7 @@ public interface BillingService{
 
 
 
-### 直接使用构造函数
+### 直接使用构造方法
 这里的代码展示了我们`new`一个credit card processor 和 transaction logger:
 
 ```java
@@ -215,6 +215,61 @@ public class RealBillingService implements BillingService {
 ```
 
 
-## 从这里开始
 
-## 绑定
+### Guice的依赖注入
+
+依赖注入这种模式，使得代码模块化并且可测试，而Guice能让依赖注入变得更易书写。在我们的账单例子中使用Guice，我们需要首先告诉它如何将接口匹配(map)到它们的实现。这个配置在在Guice的module中完成，module是一种Java类，它实现了`Module`接口:
+
+```java
+public class BillingModule extends AbstractModule {
+  @Override 
+  protected void configure() {
+    bind(TransactionLog.class).to(DatabaseTransactionLog.class);
+    bind(CreditCardProcessor.class).to(PaypalCreditCardProcessor.class);
+    bind(BillingService.class).to(RealBillingService.class);
+  }
+}
+```
+
+我们在`RealBillingService`的构造方法上面添加`@Injection`注解，这个注解可以引导Guice去使用它。Guice巡查被注解的构造方法，并且为每个参数检查值。(**)
+
+```java
+public class RealBillingService implements BillingService {
+  private final CreditCardProcessor processor;
+  private final TransactionLog transactionLog;
+
+  @Inject
+  public RealBillingService(CreditCardProcessor processor,
+      TransactionLog transactionLog) {
+    this.processor = processor;
+    this.transactionLog = transactionLog;
+  }
+
+  public Receipt chargeOrder(PizzaOrder order, CreditCard creditCard) {
+    try {
+      ChargeResult result = processor.charge(creditCard, order.getAmount());
+      transactionLog.logChargeResult(result);
+
+      return result.wasSuccessful()
+          ? Receipt.forSuccessfulCharge(order.getAmount())
+          : Receipt.forDeclinedCharge(result.getDeclineMessage());
+     } catch (UnreachableException e) {
+      transactionLog.logConnectException(e);
+      return Receipt.forSystemFailure(e.getMessage());
+    }
+  }
+}
+```
+
+最终，我们可将所有东西放在一起。`Injector`可以用来获得任何被绑定类的实例。
+
+```java
+  public static void main(String[] args) {
+    Injector injector = Guice.createInjector(new BillingModule());
+    BillingService billingService = injector.getInstance(BillingService.class);
+    ...
+  }
+```
+
+
+[Getting started](Getting_Started.md)解释了它们是如何运作的。
