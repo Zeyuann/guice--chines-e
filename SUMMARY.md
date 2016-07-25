@@ -5,3 +5,4 @@
 * [第 1 章: 用户手册](chapter1/README.md)
     * [目的](chapter1/Motivation.md)
     * [入门指南](chapter1/Getting_Started.md)
+    * [绑定(Bindings)](chapter1/Bindings.md)

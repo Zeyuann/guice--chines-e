@@ -53,8 +53,6 @@ public class BillingModule extends AbstractModule {
 }
 ```
 
-The modules are the building blocks of an injector, which is Guice's object-graph builder. First we create the injector, and then we can use that to build the BillingService:
-
 modules是一个`injector`的构建块，而`injector`是Guice的对象图构建器(builder)。首先我们产生一个injector，然后我们使用它去构建`BillingService`：
 
 ```java
