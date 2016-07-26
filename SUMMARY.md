@@ -6,7 +6,7 @@
     * [目的](chapter1/Motivation.md)
     * [入门指南](chapter1/Getting_Started.md)
     * [绑定(Bindings)](chapter1/Bindings.md)
-        * [链式绑定(Linked Bindings)](chapter1/Linked_Bindings.md)
+        * [链接绑定(Linked Bindings)](chapter1/Linked_Bindings.md)
         * [绑定有关的注解(Binding Annotations)](chapter1/Binding _Annotations.md)
         * [实例绑定(Instance Bindings)](chapter1/Instance_Bindings.md)
         * [@Provides 方法](chapter1/@Provide_Methods.md)
