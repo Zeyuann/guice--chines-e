@@ -20,6 +20,9 @@
 ### 翻译进度
 2016.07.23: Motivation部分完毕
 2016.07.24: Getting_Started部分完毕
+2016.07.2x: Bindings部分完毕
+
+
 
 ### 中英词汇对照：
 
@@ -31,11 +34,17 @@ override - 覆盖，重写
 
 constructor － 构造方法
 
+courtesy - 
+
 ### 翻译收获：
 记录译者学到的姿势：
 
 * xxx variable point at yyy instance : 变量xxx指向了yyy的实例
 
 * specify 在不同语境下的翻译
+
+* courtesy 礼貌，首……待见
+
+* clause 条款；子句
     1. 
 
