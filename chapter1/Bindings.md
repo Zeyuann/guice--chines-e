@@ -11,8 +11,8 @@ injector的工作是为对象装配图。当你请求一个既定类型的实例
 利用modules去创建
 [链接绑定(Linked Bindings)](Linked_Bindings.md)，
 [实例绑定(Instance Bindings)](Instance_Bindings.md)，
-[@Provides 方法](@Provide_Methods.md)，
-[生产者绑定(Provider Bindings)](Provider_Bindings.md)，
+[@Provides 方法](@Provides_Methods.md)，
+[Provider绑定(Provider Bindings)](Provider_Bindings.md)，
 [构造方法绑定(Constructor Bindings)](Constructor_Bindings.md)， 
 [无目标绑定(Untargeted Bindings)](Untargeted_Bindings.md)。
 

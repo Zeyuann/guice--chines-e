@@ -18,9 +18,9 @@
 
 
 ### 翻译进度
-2016.07.23: Motivation部分完毕
-2016.07.24: Getting_Started部分完毕
-2016.07.2x: Bindings部分完毕
+- 2016.07.23: Motivation部分完毕
+- 2016.07.24: Getting_Started部分完毕
+- 2016.07.2x: Bindings部分完毕
 
 
 
