@@ -12,6 +12,4 @@
         .toInstance(10);
 ```
 
-Avoid using .toInstance with objects that are complicated to create, since it can slow down application startup. You can use an @Provides method instead.
-
 应当避免在`.toInstance`中使用一个复杂对象，因为这会使拖慢应用程序的启动。你可以使用`@Provider`方法代替。
